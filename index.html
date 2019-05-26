@@ -13,10 +13,18 @@
             overflow: hidden;
         }
 
+        #time {
+            display: inline;
+            position: absolute;
+            top: 0;
+            right: 0;
+            color: azure;
+        }
     </style>
 </head>
 
 <body>
+    <div id="time">0</div>
     <div id="container"></div>
 
     <script type="text/javascript" src="js/CCapture.all.min.js"></script>
@@ -26,54 +34,39 @@
     <script src="js/functionality/controls/TrackballControls.js"></script>
     <script src="js/functionality/utils/BufferGeometryUtils.js"></script>
     <script src="js/functionality/libs/stats.min.js"></script>
+
+
+    <script src="data/stars.js"></script>
+    <script src="data/highlight_stars.js"></script>
     <script>
 
         if (WEBGL.isWebGLAvailable() === false) {
             document.body.appendChild(WEBGL.getWebGLErrorMessage());
         }
 
-        var capturer = new CCapture({
-            name: 'milkeyway',
-            format: 'webm-mediarecorder',
-            verbose: true,
-            framerate: 120,
-            display: true
-        })
-
+        var capturer
         var canvas
-        var cap_saved = false;
 
         var container, stats, controls;
         var camera, scene, renderer;
-        var points;
+        var points, point_sol;
 
         var current_t = 0;
 
-        var stars = []
-        var star = []
-        const each_star = 101
-        i = 0
-        fetch('data/stars.txt').then(r => r.text()).then(data => {
-            data.split('\n')
-                .map(line => line.trim()) //remove whitespace at the beginning and end
-                .slice(0, -1) //remove last empty line
-                .forEach(line => {
-                    i += 1
-                    // remove column1(star_id) and column2(time)
-                    row = line.split(/ +/).map(Number)
-                    star.push(row);
-                    if (i % each_star == 0) {
-                        stars.push(star);
-                        star = []
-                    }
-                });
-        }).then(() => {
-            console.log(stars.length);
-            init();
+        stars = STARS;
 
-            capturer.start();
-            animate();
-        })
+        console.log(stars.length);
+        init();
+        init_text();
+
+        // capturer = new CCapture({
+        //     name: 'milkeyway',
+        //     format: 'webm-mediarecorder',
+        //     framerate: 120,
+        //     display: true
+        // })
+        // capturer.start();
+        animate();
 
         function init() {
             container = document.getElementById('container');
@@ -95,6 +88,7 @@
             controls.dynamicDampingFactor = 0.3;
 
             var geometry = new THREE.BufferGeometry();
+            var geometry2 = new THREE.BufferGeometry();
             var positions = []
             stars.forEach(star => {
                 t0 = star[current_t];
@@ -104,10 +98,15 @@
             var colors = [];
             var color = new THREE.Color();
 
-
+            console.log(HIGHLIGHT_STARS);
             for (var i = 0; i < stars.length; i++) {
                 // positions
-                color.setRGB(80, 100, 255);
+                if (HIGHLIGHT_STARS.indexOf(i) > 0) {
+                    console.log(i, "Highlight");
+                    color.setHex(0xff0000);
+                } else {
+                    color.setHex(0xffffff);
+                }
                 colors.push(color.r, color.g, color.b);
             }
 
@@ -117,11 +116,18 @@
             geometry.addAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
             geometry.addAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
             geometry.computeBoundingSphere();
-            //
+
+            geometry2.addAttribute('position', new THREE.Float32BufferAttribute(stars[0][current_t]), 3)
+            geometry2.addAttribute('color', new THREE.Float32BufferAttribute([0, 1, 0], 3));
+            geometry2.computeBoundingSphere();
+
             var material = new THREE.PointsMaterial({ size: .2, vertexColors: THREE.VertexColors });
+            var material2 = new THREE.PointsMaterial({ size: 50, vertexColors: THREE.VertexColors });
             points = new THREE.Points(geometry, material);
+            point_sol = new THREE.Points(geometry2, material2);
             scene.add(points);
-            //
+            scene.add(point_sol);
+
             renderer = new THREE.WebGLRenderer();
             renderer.setPixelRatio(window.devicePixelRatio);
             renderer.setSize(window.innerWidth, window.innerHeight);
@@ -136,30 +142,63 @@
 
         }
 
+        function init_text() {
+
+        }
+
         function onWindowResize() {
             camera.aspect = window.innerWidth / window.innerHeight;
             camera.updateProjectionMatrix();
             renderer.setSize(window.innerWidth, window.innerHeight);
         }
 
+        frameCount = 0
         function animate() {
             requestAnimationFrame(animate);
             render();
-            if (cap_saved == false) {
-                capturer.capture(canvas);
-                console.log(current_t, "captured");
-            }
             stats.update();
+
+            // if (frameCount < 100) {
+            //     capturer.capture(canvas);
+            //     frameCount++;
+            //     console.log(current_t, "captured");
+            // } else if (frameCount == 100) {
+            //     capturer.stop();
+            //     console.log("Now Capturer Stop");
+            //     capturer.save();
+            //     cap_saved = true;
+            //     console.log("Now Capturer saved");
+            // }
         }
 
+        var update_idx = 0;
         function render() {
             controls.update()
+            // if (update_idx % 3 == 0) {
             update_points()
+            update_text()
+            // }
+            // update_idx++
+            // var time = Date.now() * 0.001;
+            // points.rotation.x = time * 0.25;
+            // points.rotation.y = time * 0.5;
+
+
+            renderer.setRenderTarget(null);
             renderer.render(scene, camera);
         }
 
+        function update_text() {
+
+        }
         function update_points() {
             var positions = points.geometry.attributes.position.array;
+            var position2 = point_sol.geometry.attributes.position.array;
+
+            position2[0] = stars[0][current_t][0]
+            position2[1] = stars[0][current_t][1]
+            position2[2] = stars[0][current_t][2]
+
             index = 0
             stars.forEach(star => {
                 pos_ti = star[current_t];
@@ -168,20 +207,14 @@
                 positions[index++] = pos_ti[2];
             })
 
+            document.getElementById('time').textContent = current_t
 
             current_t++;
             if (current_t > 100) {
                 current_t = 0;
-                if (cap_saved == false) {
-                    capturer.stop();
-                    console.log("Now Capturer Stop");
-                    capturer.save();
-                    cap_saved = true;
-                    console.log("Now Capturer saved");
-
-                }
             }
             points.geometry.attributes.position.needsUpdate = true
+            point_sol.geometry.attributes.position.needsUpdate = true
         }
 
 

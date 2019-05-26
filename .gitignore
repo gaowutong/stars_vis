@@ -1,2 +1,2 @@
-# data file
-data/stars.txt
+# data directory
+data/*
