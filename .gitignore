@@ -1,5 +1,5 @@
-# data directory
-data/*
+# ignore data stars.js for size limitation
+data/stars.js
 
 # test file
 test.html

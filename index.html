@@ -85,14 +85,14 @@
         init();
         init_text();
 
-        capturer = new CCapture({
-            name: 'milkeyway',
-            // format: 'webm-mediarecorder',
-            format: 'webm',
-            framerate: 60,
-            display: true,
-        })
-        capturer.start();
+        // capturer = new CCapture({
+        //     name: 'milkeyway',
+        //     // format: 'webm-mediarecorder',
+        //     format: 'webm',
+        //     framerate: 60,
+        //     display: true,
+        // })
+        // capturer.start();
         animate();
 
         function init() {
@@ -212,17 +212,17 @@
 
             render();
 
-            if (frameCount < sumFrame) {
-                capturer.capture(canvas);
-                frameCount++;
-                console.log(current_t, "captured");
-            } else if (frameCount == sumFrame) {
-                capturer.stop();
-                console.log("Now Capturer Stop");
-                capturer.save();
-                cap_saved = true;
-                console.log("Now Capturer saved");
-            }
+            // if (frameCount < sumFrame) {
+            //     capturer.capture(canvas);
+            //     frameCount++;
+            //     console.log(current_t, "captured");
+            // } else if (frameCount == sumFrame) {
+            //     capturer.stop();
+            //     console.log("Now Capturer Stop");
+            //     capturer.save();
+            //     cap_saved = true;
+            //     console.log("Now Capturer saved");
+            // }
         }
 
         function render() {
