@@ -1,4 +1,7 @@
 # Preview
+![Static](./img/milkeyway.jpg)
+
+# Animation
 ![Preview](./img/milkeyway.gif)
 
 
