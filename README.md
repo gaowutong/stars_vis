@@ -1,8 +1,8 @@
 # Preview
-![Static](./img/milkeyway.jpg)
+![Preview](./img/milkeyway.jpg)
 
 # Animation
-![Preview](./img/milkeyway.gif)
+![Animation](./img/milkeyway.gif)
 
 
 # Start
