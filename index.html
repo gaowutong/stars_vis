@@ -76,6 +76,7 @@
         var current_t = 0;
         frameCount = 0
         update_idx = 0
+        const sumFrame = 600;
 
 
 
@@ -88,7 +89,7 @@
             name: 'milkeyway',
             // format: 'webm-mediarecorder',
             format: 'webm',
-            framerate: 120,
+            framerate: 60,
             display: true,
         })
         capturer.start();
@@ -98,8 +99,8 @@
             container = document.getElementById('container');
             //
             camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 5, 500);
-            camera.position.x = -10;
-            camera.position.y = -20;
+            camera.position.x = 0;
+            camera.position.y = 0;
             camera.position.z = 60;
             scene = new THREE.Scene();
             scene.background = new THREE.Color(0x000000);
@@ -127,21 +128,29 @@
 
             var color = new THREE.Color();
             for (var i = 0; i < stars.length; i++) {
-                // positions
+                positions
                 if (i == 0) { // sol
                     sizes.push(5)
                 } else {
-                    sizes.push(.5)
+                    sizes.push(2)
                 }
 
                 if (i == 0) {
-                    color.setHex(0x00ff00)
-                } else if (HIGHLIGHT_STARS.indexOf(i) > 0) {
-                    console.log(i, "Highlight");
-                    color.setHex(0xff0000);
-                } else {
-                    color.setHex(0xffffff);
+                    color.setHex(0xff0000)
                 }
+                // else if (HIGHLIGHT_STARS.indexOf(i) > 0) {
+                //     console.log(i, "Highlight");
+                //     color.setHex(0x00ff00);
+                // } else {
+                //     color.setHex(0xffffff);
+                // }
+                else {
+                    pos = stars[i][0]
+                    r = pos.slice(0, 2).map(i => (i / 32) * (i / 32)).reduce((a, b) => a + b, 0)
+                    console.log(r);
+                    color.setHSL(r, Math.random(), Math.random())
+                }
+
 
                 colors.push(color.r, color.g, color.b);
             }
@@ -203,7 +212,6 @@
 
             render();
 
-            const sumFrame = 600;
             if (frameCount < sumFrame) {
                 capturer.capture(canvas);
                 frameCount++;
@@ -225,7 +233,7 @@
                 update_text()
                 // var time = Date.now() * 0.001;
                 // points.rotation.x = time * 0.25;
-                // points.rotation.y = time * 0.5;
+                // points.rotation.y = time * 0.25;
             }
 
             renderer.setRenderTarget(null);
